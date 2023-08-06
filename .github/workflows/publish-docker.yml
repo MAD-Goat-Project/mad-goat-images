@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: mad-goat-project/nginix
+  IMAGE_NAME: MAD-Goat-Project/nginix
 
 jobs:
   build-and-push-image:
