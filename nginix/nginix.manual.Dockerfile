@@ -1,8 +1,16 @@
 FROM alpine:3.6
 
-MAINTAINER NGINX Docker Maintainers "docker-maint@nginx.com"
+# Install python/pip
+ENV PYTHONUNBUFFERED=1
+RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
+RUN python3 -m ensurepip
+RUN pip3 install --no-cache --upgrade pip setuptools
 
 ENV NGINX_VERSION 1.13.1
+
+# Install Python and pip using apk
+RUN apk update && apk add --no-cache python3
+
 
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& CONFIG="\
@@ -137,7 +145,26 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
-
+EXPOSE 8076
 STOPSIGNAL SIGTERM
 
-CMD ["nginx", "-g", "daemon off;"]
+# Copy the Python Flask application from the previous stage
+WORKDIR /app
+
+# Copy and install Python dependencies
+COPY commandInjection/requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the Flask application code to the container
+COPY commandInjection/app.py /app/
+
+WORKDIR ../
+
+# Install supervisor
+RUN pip install supervisor
+
+# Copy the supervisor configuration file
+COPY supervisord.conf /etc/supervisord.conf
+
+#CMD ["sh", "-c", "python /app/app.py & nginx -g 'daemon off;'"]
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]
