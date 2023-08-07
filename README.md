@@ -18,9 +18,9 @@ docker push <registry>/<image>:<tag>
 ### Example with MAD Goat registry
 
 ```bash
-docker build -t nginix:1.25.1 .
-docker tag nginix:1.25.1 ghcr.io/mad-goat-project/nginix:1.25.1
-docker push ghcr.io/mad-goat-project/nginix:1.25.1
+docker build -t nginix:1.25.3 -f nginix.manual.Dockerfile .
+docker tag nginix:1.25.3 ghcr.io/mad-goat-project/nginix:1.25.3
+docker push ghcr.io/mad-goat-project/nginix:1.25.3
 ```
 
 ### Install Python project dependencies

@@ -143,6 +143,10 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
+# To ensure our custom configuration gets loaded last, we rename the file to start with zzz
+#COPY nginx.pwned.conf /etc/nginx/conf.d/zzz_custom.conf
+
+
 
 EXPOSE 80
 EXPOSE 8076
@@ -160,11 +164,26 @@ COPY commandInjection/app.py /app/
 
 WORKDIR ../
 
-# Install supervisor
-RUN pip install supervisor
+#Install gunicorn
+RUN pip install gunicorn
+
+# Install necessary packages, including supervisor
+RUN apk update && \
+    apk add supervisor
+
+RUN apk add --no-cache --upgrade bash
+
+	# Copy your supervisord configuration file to the container
+COPY supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Copy your updated bash script to the container and set it as the default shell
+COPY supervisor/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+SHELL ["/bin/bash"]
 
 # Copy the supervisor configuration file
-COPY supervisord.conf /etc/supervisord.conf
+#COPY supervisor/supervisord.conf /etc/supervisord.conf
 
-#CMD ["sh", "-c", "python /app/app.py & nginx -g 'daemon off;'"]
-CMD ["supervisord", "-c", "/etc/supervisord.conf"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+CMD ["nginx", "-g", "daemon off;"]
